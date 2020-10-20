@@ -69,6 +69,7 @@ import static com.the_tinkering.wk.enums.SessionType.LESSON;
 import static com.the_tinkering.wk.enums.SessionType.NONE;
 import static com.the_tinkering.wk.enums.SessionType.REVIEW;
 import static com.the_tinkering.wk.enums.SessionType.SELF_STUDY;
+import static com.the_tinkering.wk.model.SessionBalancedOrderKt.getBalancedOrder;
 import static com.the_tinkering.wk.util.ObjectSupport.nextRandomInt;
 import static java.util.Objects.requireNonNull;
 
@@ -1274,7 +1275,7 @@ s     *
 
         final List<Subject> result = new ArrayList<>();
 
-        for (int stage=0; stage<5; stage++) {
+        for (int stage = 0; stage < 5; stage++) {
             int i = 0;
             while (i < candidates.size()) {
                 if (result.size() >= maxSize) {
@@ -1285,8 +1286,7 @@ s     *
                     result.add(subject);
                     candidates.remove(i);
                     rules.notifySelected(subject);
-                }
-                else {
+                } else {
                     i++;
                 }
             }
@@ -1296,23 +1296,34 @@ s     *
         return result;
     }
 
-    /**
-     * Given a list of subjects, populate the session with items for all subjects.
-     *
-     * @param subjects the list of subjects
-     * @param maxSize the maximum size of the session
-     * @param shuffle should the subject list be shuffled before applying the ordering rules
-     */
-    @SuppressLint("NewApi")
-    private void populateItems(final List<Subject> subjects, final int maxSize, final boolean shuffle) {
-        LOGGER.info("Starting %s session", type);
-
+    private List<Subject> getBasicOrder(final List<Subject> subjects, final boolean shuffle) {
         List<Subject> list = new ArrayList<>(subjects);
         if (shuffle) {
             Collections.shuffle(list);
         }
 
         Collections.sort(list, comparator);
+
+        return list;
+    }
+
+    /**
+     * Given a list of subjects, populate the session with items for all subjects.
+     *  @param subjects the list of subjects
+     * @param maxSize the maximum size of the session
+     * @param lessonOrder lessonOrder to use
+     */
+        @SuppressLint("NewApi")
+    private void populateItems(final List<Subject> subjects, final int maxSize, final LessonOrder lessonOrder) {
+        LOGGER.info("Starting %s session", type);
+
+        List<Subject> list;
+
+        if (lessonOrder == LessonOrder.BALANCED_BY_TYPE || lessonOrder == LessonOrder.BALANCED_BY_FREQUENCY) {
+            list = getBalancedOrder(subjects, lessonOrder, true);
+        } else {
+            list = getBasicOrder(subjects, lessonOrder.isShuffle());
+        }
 
         if (list.size() > maxSize) {
             list = trimSelection(list, maxSize);
@@ -1409,7 +1420,7 @@ s     *
                 maxLevel);
 
         history.clear();
-        populateItems(subjects, maxSize, GlobalSettings.AdvancedLesson.getOrder().isShuffle());
+        populateItems(subjects, maxSize, GlobalSettings.AdvancedLesson.getOrder());
         createQuestions();
         state = IN_LESSON_PRESENTATION;
         adapter.clear();
@@ -1460,7 +1471,7 @@ s     *
                 maxLevel);
 
         history.clear();
-        populateItems(subjects, maxSize, true);
+        populateItems(subjects, maxSize, LessonOrder.SHUFFLE);
         createQuestions();
         state = ACTIVE;
         adapter.clear();
@@ -1511,7 +1522,7 @@ s     *
                 maxLevel);
 
         history.clear();
-        populateItems(subjects, maxSize, true);
+        populateItems(subjects, maxSize, LessonOrder.SHUFFLE);
         createQuestions();
         state = ACTIVE;
         adapter.clear();

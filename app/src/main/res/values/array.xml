@@ -17,6 +17,8 @@
 
 <resources>
     <string-array name="lessonOrders">
+        <item>Balanced by type</item>
+        <item>Balanced by frequency</item>
         <item>Shuffle</item>
         <item>Level, Type</item>
         <item>Radicals, Level, Type</item>
@@ -26,6 +28,8 @@
     </string-array>
 
     <string-array name="lessonOrderValues">
+        <item>BALANCED_BY_TYPE</item>
+        <item>BALANCED_BY_FREQUENCY</item>
         <item>SHUFFLE</item>
         <item>LEVEL_THEN_TYPE</item>
         <item>RADICALS_THEN_LEVEL_THEN_TYPE</item>

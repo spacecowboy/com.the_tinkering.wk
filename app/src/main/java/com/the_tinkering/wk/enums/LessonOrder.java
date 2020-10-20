@@ -29,6 +29,24 @@ import java.util.Comparator;
 @SuppressLint("NewApi")
 public enum LessonOrder {
     /**
+     * Picks random weighted by type - comparator sorts by unlocking time
+     */
+    BALANCED_BY_FREQUENCY(false) {
+        @Override
+        public Comparator<Subject> getComparator() {
+            return Comparator.comparingLong(Subject::getUnlockedAt);
+        }
+    },
+    /**
+     * Picks random weighted by type - comparator sorts by unlocking time
+     */
+    BALANCED_BY_TYPE(false) {
+        @Override
+        public Comparator<Subject> getComparator() {
+            return Comparator.comparingLong(Subject::getUnlockedAt);
+        }
+    },
+    /**
      * Completely random order. I.e., the comparator always returns 0 and doesn't impose an order.
      */
     SHUFFLE(true) {
